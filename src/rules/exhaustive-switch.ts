@@ -32,7 +32,7 @@ function getUnionMembers(type: ts.Type): Set<string | number | boolean> {
   return members
 }
 
-function getCaseValues(cases: TSESTree.SwitchCase[]): Set<string | number | boolean> {
+function getCaseValues(cases: TSESTree.SwitchCase[], checker: ts.TypeChecker, services: ReturnType<typeof ESLintUtils.getParserServices>): Set<string | number | boolean> {
   const values = new Set<string | number | boolean>()
   for (const c of cases) {
     if (!c.test) continue
@@ -41,6 +41,11 @@ function getCaseValues(cases: TSESTree.SwitchCase[]): Set<string | number | bool
       if (t.value !== null && t.value !== undefined) {
         values.add(t.value as string | number | boolean)
       }
+    } else {
+      const tsNode = services.esTreeNodeToTSNodeMap.get(t)
+      const type = checker.getTypeAtLocation(tsNode)
+      const val = getLiteralValue(type)
+      if (val !== null) values.add(val)
     }
   }
   return values
@@ -67,16 +72,13 @@ export const exhaustiveSwitch = createRule<Options, MessageIds>({
 
     return {
       SwitchStatement(node: TSESTree.SwitchStatement) {
-        const hasDefault = node.cases.some((c) => c.test === null)
-        if (hasDefault) return
-
         const tsNode = services.esTreeNodeToTSNodeMap.get(node.discriminant)
         const type = checker.getTypeAtLocation(tsNode)
 
         const unionMembers = getUnionMembers(type)
         if (unionMembers.size === 0) return
 
-        const caseValues = getCaseValues(node.cases)
+        const caseValues = getCaseValues(node.cases, checker, services)
 
         const missing = [...unionMembers].filter((m) => !caseValues.has(m))
         if (missing.length > 0) {

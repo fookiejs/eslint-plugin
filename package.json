@@ -32,6 +32,9 @@
   "dependencies": {
     "@typescript-eslint/utils": "^8.0.0"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@typescript-eslint/parser": "^8.0.0",
