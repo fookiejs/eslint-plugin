@@ -1,5 +1,5 @@
 {
-  "name": "fookie-eslint-plugin",
+  "name": "@fookiejs/eslint-plugin",
   "version": "0.1.0",
   "description": "ESLint plugin for TypeScript code quality — naming, structure, type safety.",
   "type": "module",
