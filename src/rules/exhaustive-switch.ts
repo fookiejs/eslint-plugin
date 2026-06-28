@@ -7,7 +7,7 @@ const createRule = ESLintUtils.RuleCreator(
 )
 
 type Options = []
-type MessageIds = "nonExhaustiveSwitch"
+type MessageIds = "nonExhaustiveSwitch" | "unnecessaryDefault"
 
 function getLiteralValue(type: ts.Type): string | number | boolean | null {
   if (type.flags & ts.TypeFlags.StringLiteral) return (type as ts.StringLiteralType).value
@@ -18,7 +18,19 @@ function getLiteralValue(type: ts.Type): string | number | boolean | null {
   return null
 }
 
-function getUnionMembers(type: ts.Type): Set<string | number | boolean> {
+function getEnumMembers(type: ts.Type, checker: ts.TypeChecker): Set<string | number | boolean> | null {
+  const symbol = type.symbol
+  if (!symbol || !(symbol.flags & ts.SymbolFlags.Enum)) return null
+  const members = new Set<string | number | boolean>()
+  for (const exp of checker.getExportsOfModule(symbol)) {
+    const memberType = checker.getTypeOfSymbol(exp)
+    const val = getLiteralValue(memberType)
+    if (val !== null) members.add(val)
+  }
+  return members.size > 0 ? members : null
+}
+
+function getUnionMembers(type: ts.Type, checker: ts.TypeChecker): Set<string | number | boolean> {
   const members = new Set<string | number | boolean>()
   if (type.isUnion()) {
     for (const t of type.types) {
@@ -26,6 +38,8 @@ function getUnionMembers(type: ts.Type): Set<string | number | boolean> {
       if (val !== null) members.add(val)
     }
   } else {
+    const enumMembers = getEnumMembers(type, checker)
+    if (enumMembers) return enumMembers
     const val = getLiteralValue(type)
     if (val !== null) members.add(val)
   }
@@ -63,6 +77,8 @@ export const exhaustiveSwitch = createRule<Options, MessageIds>({
     messages: {
       nonExhaustiveSwitch:
         "Switch is not exhaustive. Missing cases: {{missing}}. Handle all union members explicitly instead of relying on default.",
+      unnecessaryDefault:
+        "All union members are handled. Remove the default case to make this switch exhaustive.",
     },
   },
   defaultOptions: [],
@@ -75,17 +91,24 @@ export const exhaustiveSwitch = createRule<Options, MessageIds>({
         const tsNode = services.esTreeNodeToTSNodeMap.get(node.discriminant)
         const type = checker.getTypeAtLocation(tsNode)
 
-        const unionMembers = getUnionMembers(type)
+        const unionMembers = getUnionMembers(type, checker)
         if (unionMembers.size === 0) return
 
         const caseValues = getCaseValues(node.cases, checker, services)
 
+        const hasDefault = node.cases.some((c) => c.test === null)
         const missing = [...unionMembers].filter((m) => !caseValues.has(m))
         if (missing.length > 0) {
           context.report({
             node,
             messageId: "nonExhaustiveSwitch",
             data: { missing: missing.map((m) => JSON.stringify(m)).join(", ") },
+          })
+        } else if (hasDefault) {
+          const defaultCase = node.cases.find((c) => c.test === null)
+          context.report({
+            node: defaultCase!,
+            messageId: "unnecessaryDefault",
           })
         }
       },

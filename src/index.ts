@@ -36,6 +36,7 @@ import { noObjectAssignMutation } from "./rules/no-object-assign-mutation.js"
 import { noPrototypeMutation } from "./rules/no-prototype-mutation.js"
 import { noDefineProperty } from "./rules/no-define-property.js"
 import { noMapSetMutation } from "./rules/no-map-set-mutation.js"
+import { minFunctionLines } from "./rules/min-function-lines.js"
 import { noLegacyGlobals } from "./rules/no-legacy-globals.js"
 import { noNewWrappers } from "./rules/no-new-wrappers.js"
 import { noNonNullAssertion } from "./rules/no-non-null-assertion.js"
@@ -98,6 +99,7 @@ const rules = {
   "no-prototype-mutation": noPrototypeMutation,
   "no-define-property": noDefineProperty,
   "no-map-set-mutation": noMapSetMutation,
+  "min-function-lines": minFunctionLines,
 }
 
 const configs: Record<string, unknown> = {}
@@ -158,6 +160,7 @@ const recommendedRules = {
   "fookie/no-prototype-mutation": "error",
   "fookie/no-define-property": "error",
   "fookie/no-map-set-mutation": "error",
+  "fookie/min-function-lines": ["error", { min: 7 }],
 }
 
 configs["recommended"] = {
