@@ -28,6 +28,14 @@ import { noDefaultExport } from "./rules/no-default-export.js"
 import { requirePrivateConstructor } from "./rules/require-private-constructor.js"
 import { noUnknown } from "./rules/no-unknown.js"
 import { requireCurly } from "./rules/require-curly.js"
+import { noNan } from "./rules/no-nan.js"
+import { noNanInMathResult } from "./rules/no-nan-in-math-result.js"
+import { noParseIntNan } from "./rules/no-parseint-nan.js"
+import { noNanArrayIndexOf } from "./rules/no-nan-array-indexof.js"
+import { noObjectAssignMutation } from "./rules/no-object-assign-mutation.js"
+import { noPrototypeMutation } from "./rules/no-prototype-mutation.js"
+import { noDefineProperty } from "./rules/no-define-property.js"
+import { noMapSetMutation } from "./rules/no-map-set-mutation.js"
 import { noLegacyGlobals } from "./rules/no-legacy-globals.js"
 import { noNewWrappers } from "./rules/no-new-wrappers.js"
 import { noNonNullAssertion } from "./rules/no-non-null-assertion.js"
@@ -82,6 +90,14 @@ const rules = {
   "require-private-constructor": requirePrivateConstructor,
   "no-unknown": noUnknown,
   "require-curly": requireCurly,
+  "no-nan": noNan,
+  "no-nan-in-math-result": noNanInMathResult,
+  "no-parseint-nan": noParseIntNan,
+  "no-nan-array-indexof": noNanArrayIndexOf,
+  "no-object-assign-mutation": noObjectAssignMutation,
+  "no-prototype-mutation": noPrototypeMutation,
+  "no-define-property": noDefineProperty,
+  "no-map-set-mutation": noMapSetMutation,
 }
 
 const configs: Record<string, unknown> = {}
@@ -134,6 +150,14 @@ const recommendedRules = {
   "fookie/require-private-constructor": "error",
   "fookie/no-unknown": "error",
   "fookie/require-curly": "error",
+  "fookie/no-nan": "error",
+  "fookie/no-nan-in-math-result": "error",
+  "fookie/no-parseint-nan": "error",
+  "fookie/no-nan-array-indexof": "error",
+  "fookie/no-object-assign-mutation": "error",
+  "fookie/no-prototype-mutation": "error",
+  "fookie/no-define-property": "error",
+  "fookie/no-map-set-mutation": "error",
 }
 
 configs["recommended"] = {
