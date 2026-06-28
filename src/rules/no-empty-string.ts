@@ -27,6 +27,24 @@ export const noEmptyString = createRule<Options, MessageIds>({
           context.report({ node, messageId: "noEmptyString" })
         }
       },
+      CallExpression(node: TSESTree.CallExpression) {
+        if (
+          node.callee.type === "Identifier" &&
+          node.callee.name === "String" &&
+          node.arguments.length === 0
+        ) {
+          context.report({ node, messageId: "noEmptyString" })
+        }
+      },
+      NewExpression(node: TSESTree.NewExpression) {
+        if (
+          node.callee.type === "Identifier" &&
+          node.callee.name === "String" &&
+          node.arguments.length === 0
+        ) {
+          context.report({ node, messageId: "noEmptyString" })
+        }
+      },
     }
   },
 })
