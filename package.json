@@ -1,6 +1,6 @@
 {
   "name": "@fookiejs/eslint-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ESLint plugin for TypeScript code quality — naming, structure, type safety.",
   "type": "module",
   "main": "./dist/index.js",
