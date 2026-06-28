@@ -32,6 +32,10 @@ export const noNullUndefined = createRule<Options, MessageIds>({
         context.report({ node, messageId: "noNull" })
       },
 
+      TSNullKeyword(node: TSESTree.TSNullKeyword) {
+        context.report({ node, messageId: "noNull" })
+      },
+
       "Identifier[name='undefined']"(node: TSESTree.Identifier) {
         context.report({ node, messageId: "noUndefined" })
       },
