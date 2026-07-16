@@ -2,7 +2,7 @@ import { AST_NODE_TYPES, ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -14,12 +14,12 @@ export const noCatchUnknown = createRule<Options, MessageIds>({
     type: "suggestion",
     docs: {
       description:
-        "Disallow explicit `unknown` type annotation on catch bindings. Pair with no-throw-literal to guarantee catch variables are always Error instances.",
+        "Disallow explicit `unknown` type annotation on catch bindings. Leave catch unannotated; pair with no-throw-literal and useUnknownInCatchVariables false.",
     },
     schema: [],
     messages: {
       noCatchUnknown:
-        "Do not annotate catch bindings as `unknown`. Pair this plugin's no-throw-literal rule to guarantee the caught value is always an Error.",
+        "Do not annotate catch bindings as `unknown`. Leave the binding unannotated; pair with no-throw-literal and useUnknownInCatchVariables: false.",
     },
   },
   defaultOptions: [],

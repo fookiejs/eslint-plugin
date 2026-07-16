@@ -2,7 +2,7 @@ import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -14,12 +14,12 @@ export const noObjectAssignMutation = createRule<Options, MessageIds>({
     type: "problem",
     docs: {
       description:
-        "Disallow Object.assign() with an existing object as the first argument. Use a fresh {} target to avoid mutating existing references.",
+        "Disallow Object.assign() with an existing object as the first argument. Return a new Model instance instead of mutating or spreading.",
     },
     schema: [],
     messages: {
       noObjectAssignMutation:
-        "Object.assign() with an existing reference as target mutates it in place. Use Object.assign({}, ...) or spread syntax { ...obj } instead.",
+        "Object.assign() with an existing reference as target mutates it in place. Return a new Model instance (e.g. account.withPatch(patch)), do not spread.",
     },
   },
   defaultOptions: [],

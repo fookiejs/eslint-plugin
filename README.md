@@ -25,6 +25,8 @@ export default [
 ]
 ```
 
+Set `"useUnknownInCatchVariables": false` in `tsconfig.json`. Catch bindings must stay unannotated — TypeScript only allows `any` / `unknown` annotations there, and both are forbidden by this plugin. Pair with `no-throw-literal` so the runtime value is always an `Error`.
+
 ---
 
 ## Rules
@@ -35,21 +37,21 @@ export default [
 Disallow the `any` type.
 ```ts
 // ❌
-const user: any = fetchUser(url)
+const user: any = fetchUser(profileUrl)
 
 // ✅
-const user: User = await fetchUser(url)
+const user: User = await fetchUser(profileUrl)
 ```
 
 #### `no-type-assertion`
-Disallow `as` type assertions.
+Disallow `as` type assertions. Narrow with domain type predicates — do not mix unrelated types in one union.
 ```ts
 // ❌
-const user = response as User
+const user = httpPayload as User
 
 // ✅
-function isUser(value: User | Response): value is User {
-  return value instanceof User
+function isRegisteredUser(account: Account): account is RegisteredUser {
+  return account instanceof RegisteredUser
 }
 ```
 
@@ -57,11 +59,11 @@ function isUser(value: User | Response): value is User {
 Disallow non-null assertions (`!`).
 ```ts
 // ❌
-getElement('app')!.innerHTML = ''
+queryAppRoot('app')!.innerHTML = ''
 
 // ✅
-const element = getElement('app')
-element.innerHTML = ''
+const appRoot = queryAppRoot('app')
+appRoot.replaceChildren()
 ```
 
 #### `same-type-comparison`
@@ -90,28 +92,30 @@ throw new Error('something went wrong')
 ```
 
 #### `no-catch-unknown`
-Disallow explicit `unknown` annotation on catch bindings.
+Disallow explicit `unknown` annotation on catch bindings. Leave the binding unannotated. Pair with `no-throw-literal` and `useUnknownInCatchVariables: false`.
 ```ts
 // ❌
-catch (e: unknown) { }
+catch (caughtError: unknown) { }
 
 // ✅
-catch (e) {
-  console.log(e.message)
+catch (caughtError) {
+  reportFailure(caughtError)
 }
 ```
 
 #### `no-catch-instanceof`
-Disallow `instanceof Error` checks inside catch blocks. Pair with `no-throw-literal` — `e` is always an `Error`.
+Disallow `instanceof Error` checks inside catch blocks. Pair with `no-throw-literal` — pass the caught value to an `Error`-typed handler.
 ```ts
 // ❌
-catch (e) {
-  if (e instanceof Error) console.log(e.message)
+catch (caughtError) {
+  if (caughtError instanceof Error) {
+    console.log(caughtError.message)
+  }
 }
 
 // ✅
-catch (e) {
-  console.log(e.message)
+catch (caughtError) {
+  reportFailure(caughtError)
 }
 ```
 
@@ -130,30 +134,31 @@ await saveUser(user)
 ### Immutability
 
 #### `no-array-mutating-methods`
-Disallow in-place array mutation methods.
+Disallow in-place array mutation methods. Use non-mutating copies such as `toSorted` / `toReversed`, or pure derivations.
 ```ts
 // ❌
-items.sort()
-items.reverse()
-items.splice(0, 1)
+orderLines.sort()
+orderLines.reverse()
+orderLines.splice(0, 1)
 
 // ✅
-[...items].sort()
-[...items].reverse()
-items.filter((item, index) => index !== 0)
+orderLines.toSorted()
+orderLines.toReversed()
+orderLines.filter((_orderLine, orderIndex) => orderIndex !== 0)
 ```
 
 #### `no-param-reassign`
 Disallow reassignment of function parameters.
 ```ts
 // ❌
-function normalize(user: User): void {
-  user = sanitize(user)
+function totalWithTax(amount: number): number {
+  amount = amount * 1.2
+  return amount
 }
 
 // ✅
-function normalize(user: User): User {
-  return sanitize(user)
+function totalWithTax(amount: number): number {
+  return amount * 1.2
 }
 ```
 
@@ -164,7 +169,7 @@ Disallow the `delete` operator.
 delete record.key
 
 // ✅
-const { key, ...rest } = record
+const recordWithoutKey = record.withoutKey()
 ```
 
 #### `no-mutable-exports`
@@ -181,14 +186,19 @@ export const count = 0
 Disallow `this.prop =` assignments outside the constructor.
 ```ts
 // ❌
-class Store {
-  update(): void { this.value = 42 }
+class ScoreBoard {
+  update(): void { this.score = 42 }
 }
 
 // ✅
-class Store {
-  private constructor(readonly value: number) {}
-  withValue(newValue: number): Store { return new Store(newValue) }
+class ScoreBoard {
+  private constructor(readonly score: number) {}
+  static create(score: number): ScoreBoard {
+    return new ScoreBoard(score)
+  }
+  withScore(nextScore: number): ScoreBoard {
+    return new ScoreBoard(nextScore)
+  }
 }
 ```
 
@@ -196,10 +206,10 @@ class Store {
 Array parameters must be typed as `readonly`.
 ```ts
 // ❌
-function sum(nums: number[]): number
+function sumAmounts(amounts: number[]): number
 
 // ✅
-function sum(nums: readonly number[]): number
+function sumAmounts(amounts: readonly number[]): number
 ```
 
 ---
@@ -211,25 +221,25 @@ Conditions in `if`/`while`/ternary must be explicitly boolean.
 ```ts
 // ❌
 if (user) { }
-if (items.length) { }
+if (orderLines.length) { }
 
 // ✅
 if (user.isActive === true) { }
-if (items.length > 0) { }
+if (orderLines.length > 0) { }
 ```
 
 #### `exhaustive-switch`
 Switch over union types must cover all members without a `default` fallback.
 ```ts
 // ❌
-type Status = 'active' | 'inactive' | 'banned'
-switch (status) {
+type AccountStatus = 'active' | 'inactive' | 'banned'
+switch (accountStatus) {
   case 'active': return 'Active'
   case 'inactive': return 'Inactive'
 }
 
 // ✅
-switch (status) {
+switch (accountStatus) {
   case 'active': return 'Active'
   case 'inactive': return 'Inactive'
   case 'banned': return 'Banned'
@@ -240,13 +250,17 @@ switch (status) {
 Functions must either always or never return a value.
 ```ts
 // ❌
-function getLabel(status: string) {
-  if (status === 'active') return 'Active'
+function getStatusLabel(accountStatus: string) {
+  if (accountStatus === 'active') {
+    return 'Active'
+  }
 }
 
 // ✅
-function getLabel(status: string): string {
-  if (status === 'active') return 'Active'
+function getStatusLabel(accountStatus: string): string {
+  if (accountStatus === 'active') {
+    return 'Active'
+  }
   return 'Unknown'
 }
 ```
@@ -255,13 +269,13 @@ function getLabel(status: string): string {
 Async functions must contain at least one `await`.
 ```ts
 // ❌
-async function getUser(): Promise<User> {
-  return db.find()
+async function loadUser(): Promise<User> {
+  return db.findUser()
 }
 
 // ✅
-async function getUser(): Promise<User> {
-  return await db.find()
+async function loadUser(): Promise<User> {
+  return await db.findUser()
 }
 ```
 
@@ -274,8 +288,8 @@ for (let count = 0; count < 3; count++) {
 }
 
 // ✅
-for (const item of items) {
-  process(item)
+for (const orderLine of orderLines) {
+  processOrderLine(orderLine)
 }
 ```
 
@@ -284,7 +298,7 @@ for (const item of items) {
 ### Naming
 
 #### `no-generic-names`
-Disallow vague names like `data`, `info`, `temp`, `result`, `obj`.
+Disallow vague names like `data`, `info`, `temp`, `result`, `obj`, `item`, `value`, `element`.
 ```ts
 // ❌
 const data = await fetchUser()
@@ -296,13 +310,13 @@ const displayName = user.name
 ```
 
 #### `no-placeholder-names`
-Disallow single-letter variable names.
+Disallow placeholder names like `foo`, `bar`, `baz`, `qux`, `dummy`.
 ```ts
 // ❌
-items.map(x => x.name)
+catalogEntries.map(foo => foo.name)
 
 // ✅
-items.map(item => item.name)
+catalogEntries.map(catalogEntry => catalogEntry.name)
 ```
 
 #### `no-shadow`
@@ -325,39 +339,41 @@ users.map(member => member.name)
 Disallow `for...in` — it iterates the prototype chain.
 ```ts
 // ❌
-for (const key in config) { }
+for (const configKey in config) { }
 
 // ✅
-for (const key of Object.keys(config)) { }
+for (const configKey of Object.keys(config)) { }
 ```
 
 #### `no-implicit-coercion`
 Disallow implicit type coercions.
 ```ts
 // ❌
-const parsed = +'42'
-const flag = !!value
+const parsedAmount = +'42'
+const isEnabled = !!rawFlag
 
 // ✅
-const parsed = Number('42')
-const flag = Boolean(value)
+const parsedAmount = Number('42')
+const isEnabled = Boolean(rawFlag)
 ```
 
 #### `no-typeof`
 Disallow `typeof` checks — use `instanceof` or type predicates.
 ```ts
 // ❌
-if (typeof response === 'string') { }
+if (typeof accountStatus === 'string') { }
 
 // ✅
-if (response instanceof HttpError) { }
+if (accountStatus instanceof SuspendedStatus) { }
 ```
-
 #### `no-eval`
 Disallow `eval()` and indirect eval patterns.
 ```ts
 // ❌
 eval('console.log(1)')
+
+// ✅
+parseConfig(configSource)
 ```
 
 #### `no-new-wrappers`
@@ -374,30 +390,32 @@ const greeting = 'hello'
 Require `.includes()` over `.indexOf()` comparisons.
 ```ts
 // ❌
-items.indexOf('target') !== -1
+orderLines.indexOf('target') !== -1
 
 // ✅
-items.includes('target')
+orderLines.includes('target')
 ```
 
 #### `no-string-concat`
 Disallow `+` string concatenation. Use template literals.
 ```ts
 // ❌
-'Hello, ' + name + '!'
+'Hello, ' + displayName + '!'
 
 // ✅
-`Hello, ${name}!`
+`Hello, ${displayName}!`
 ```
 
 #### `no-legacy-globals`
-Disallow `window`, `document`, `global` direct access.
+Disallow host globals (`window`, `document`, `global`, `globalThis`), legacy calls (`parseInt`, `isNaN`, …), and `arguments`.
 ```ts
 // ❌
-window.addEventListener('click', handler)
+window.addEventListener('click', clickHandler)
+parseInt(raw, 10)
 
 // ✅
-addEventListener('click', handler)
+addEventListener('click', clickHandler)
+Number.parseInt(raw, 10)
 ```
 
 ---
@@ -418,10 +436,10 @@ import fs from 'fs'
 Disallow default exports. Use named exports.
 ```ts
 // ❌
-export default function handler() { }
+export default function handleRequest() { }
 
 // ✅
-export function handler() { }
+export function handleRequest(): void { }
 ```
 
 #### `no-process-env`
@@ -450,7 +468,9 @@ class User {
 // ✅
 class User {
   private constructor(public name: string) {}
-  static create(name: string): User { return new User(name) }
+  static create(name: string): User {
+    return new User(name)
+  }
 }
 ```
 
@@ -459,13 +479,18 @@ Disallow `this.prop =` outside the constructor.
 ```ts
 // ❌
 class Counter {
-  increment(): void { this.value++ }
+  increment(): void { this.count++ }
 }
 
 // ✅
 class Counter {
-  private constructor(readonly value: number) {}
-  increment(): Counter { return new Counter(this.value + 1) }
+  private constructor(readonly count: number) {}
+  static create(count: number): Counter {
+    return new Counter(count)
+  }
+  increment(): Counter {
+    return new Counter(this.count + 1)
+  }
 }
 ```
 
@@ -477,13 +502,13 @@ class Counter {
 Exported functions and public class methods must declare return types.
 ```ts
 // ❌
-export function getUser(id: string) {
-  return db.find(id)
+export function loadUserById(userId: string) {
+  return db.findUserById(userId)
 }
 
 // ✅
-export function getUser(id: string): Promise<User> {
-  return db.find(id)
+export function loadUserById(userId: string): Promise<User> {
+  return db.findUserById(userId)
 }
 ```
 
@@ -491,22 +516,209 @@ export function getUser(id: string): Promise<User> {
 Disallow code comments — write self-documenting code instead.
 ```ts
 // ❌
-const result = await get(id)
+// resolve account from store
+const account = await fetchUserById(userId)
 
 // ✅
-const user = await fetchUserById(id)
+const account = await fetchUserById(userId)
 ```
 
 #### `no-null-undefined`
-Disallow `null`, `undefined`, and `void` as values. Use optional types with implicit return.
+Disallow `null`, `undefined`, and `void` as values. Do not call APIs that return `null`. Prefer a present value or throw.
 ```ts
 // ❌
-function find(id: string): User | null {
+function findUserById(userId: string): User | null {
   return null
 }
 
 // ✅
-function find(id: string): User | undefined {
-  return records.get(id)
+function loadUserById(userId: string): User {
+  return userRepository.loadByIdOrThrow(userId)
 }
+```
+
+#### `min-function-lines`
+Function bodies need at least 7 lines. Tiny snippets elsewhere in this README only illustrate other rules — production methods earn their length with real steps, not rename chains.
+```ts
+// ❌
+function loadAccount(): Account {
+  return accountRepository.loadOrThrow(accountId)
+}
+
+// ✅
+function chargeOrder(order: Order): Receipt {
+  const pricedOrder = priceOrder(order)
+  const taxedOrder = applyTax(pricedOrder)
+  const paidOrder = capturePayment(taxedOrder)
+  const packedOrder = reserveStock(paidOrder)
+  const shippedOrder = scheduleShipment(packedOrder)
+  const closedOrder = closeOrder(shippedOrder)
+  return issueReceipt(closedOrder)
+}
+```
+
+#### `no-unknown`
+Disallow the `unknown` type. Use a specific Model or domain union.
+```ts
+// ❌
+function parseAccount(raw: unknown): Account {
+  return Account.create(raw)
+}
+
+// ✅
+function parseAccount(raw: AccountDraft): Account {
+  return Account.create(raw)
+}
+```
+
+#### `no-nullish-operators`
+Disallow `??` and `?.`. Design Models that guarantee presence.
+```ts
+// ❌
+const displayName = account.name ?? 'guest'
+const city = account.address?.city
+
+// ✅
+const displayName = account.name
+const city = account.address.city
+```
+
+#### `no-empty-string`
+Disallow empty string literals (`""`).
+```ts
+// ❌
+const label = ''
+
+// ✅
+const label = DEFAULT_LABEL
+```
+
+#### `require-curly`
+Require curly braces for all control flow statements.
+```ts
+// ❌
+if (account.isActive === true) return account
+
+// ✅
+if (account.isActive === true) {
+  return account
+}
+```
+
+---
+
+### NaN
+
+#### `no-nan`
+Disallow the `NaN` keyword. Check with `Number.isNaN` when forced to confront foreign numeric junk — prefer Models that never carry NaN.
+```ts
+// ❌
+const broken = NaN
+
+// ✅
+if (Number.isNaN(foreignAmount) === true) {
+  throw new Error('amount invalid')
+}
+```
+
+#### `no-nan-in-math-result`
+Do not feed `Math` calls that can yield NaN straight into arithmetic without a guard.
+```ts
+// ❌
+const root = Math.sqrt(area) + 1
+
+// ✅
+const rootCandidate = Math.sqrt(area)
+if (Number.isNaN(rootCandidate) === true) {
+  throw new Error('area invalid')
+}
+const root = rootCandidate + 1
+```
+
+#### `no-parseint-nan`
+Do not use `parseInt` / `parseFloat` results in arithmetic without a NaN guard.
+```ts
+// ❌
+const total = parseInt(rawCount, 10) + 1
+
+// ✅
+const parsedCount = parseInt(rawCount, 10)
+if (Number.isNaN(parsedCount) === true) {
+  throw new Error('count invalid')
+}
+const total = parsedCount + 1
+```
+
+#### `no-nan-array-indexof`
+Disallow `array.indexOf(NaN)`. Do not put NaN in arrays — redesign the Model.
+```ts
+// ❌
+amounts.indexOf(NaN)
+
+// ✅
+amounts.includes(targetAmount)
+```
+
+---
+
+### Mutation
+
+#### `no-object-assign-mutation`
+Disallow `Object.assign` onto an existing reference.
+```ts
+// ❌
+Object.assign(account, patch)
+
+// ✅
+const nextAccount = account.withPatch(patch)
+```
+
+#### `no-prototype-mutation`
+Disallow mutating prototypes at runtime.
+```ts
+// ❌
+Account.prototype.tag = 'x'
+
+// ✅
+class Account {
+  private constructor(readonly tag: string) {}
+  static create(tag: string): Account {
+    return new Account(tag)
+  }
+}
+```
+
+#### `no-define-property`
+Disallow `Object.defineProperty` / `Object.defineProperties`.
+```ts
+// ❌
+Object.defineProperty(account, 'locked', { value: true })
+
+// ✅
+const lockedAccount = account.withLocked(true)
+```
+
+#### `no-map-set-mutation`
+Disallow mutating `Map` / `Set` instances created with `new`.
+```ts
+// ❌
+const registry = new Map()
+registry.set(userId, account)
+
+// ✅
+const registry = new Map([[userId, account]])
+```
+
+#### `no-spread`
+Disallow spread and rest (`...`). Copying bags is not Model work — return a new instance through an explicit method.
+```ts
+// ❌
+const nextAccount = { ...account, ...patch }
+const { key, ...rest } = record
+fn(...args)
+
+// ✅
+const nextAccount = account.withPatch(patch)
+const recordWithoutKey = record.withoutKey()
+fn(firstArg, secondArg)
 ```

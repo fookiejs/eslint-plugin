@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "node --import tsx/esm --test 'tests/**/*.test.ts'",
+    "test": "node --import tsx/esm --test tests/rules/*.test.ts",
     "lint": "eslint src tests"
   },
   "keywords": [

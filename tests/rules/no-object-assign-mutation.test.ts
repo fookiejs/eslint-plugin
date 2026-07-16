@@ -14,9 +14,8 @@ const tester = new RuleTester({
 
 tester.run("no-object-assign-mutation", noObjectAssignMutation, {
   valid: [
-    { code: "Object.assign({}, source)" },
-    { code: "Object.assign({}, a, b, c)" },
-    { code: "const r = { ...obj }" },
+    { code: "const nextAccount = account.withPatch(patch)" },
+    { code: "const nextAccount = Account.create(draft)" },
   ],
   invalid: [
     {

@@ -3,7 +3,7 @@ import * as ts from "typescript"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -24,7 +24,7 @@ export const noStringConcat = createRule<Options, MessageIds>({
     schema: [],
     messages: {
       noStringConcat:
-        "Do not concatenate strings with +. Use a template literal (`${...}`) instead.",
+        "Do not concatenate strings with +. Use a template literal instead.",
     },
   },
   defaultOptions: [],

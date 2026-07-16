@@ -3,7 +3,7 @@ import * as ts from "typescript"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -37,12 +37,12 @@ export const noArrayMutatingMethods = createRule<Options, MessageIds>({
     type: "problem",
     docs: {
       description:
-        "Disallow in-place array mutation methods. Use spread + method or non-mutating alternatives instead.",
+        "Disallow in-place array mutation methods. Use non-mutating alternatives such as toSorted, toReversed, toSpliced, filter, or map.",
     },
     schema: [],
     messages: {
       noArrayMutatingMethod:
-        "'{{method}}' mutates the array in place. Use '[...arr].{{method}}()' or a non-mutating alternative.",
+        "'{{method}}' mutates the array in place. Use a non-mutating alternative such as toSorted(), toReversed(), toSpliced(), filter, or map.",
     },
   },
   defaultOptions: [],

@@ -2,7 +2,7 @@ import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -18,7 +18,7 @@ export const noDelete = createRule<Options, MessageIds>({
     schema: [],
     messages: {
       noDelete:
-        "Do not use 'delete'. Use destructuring instead: const { {{key}}, ...rest } = obj.",
+        "Do not use 'delete'. Return a new value without '{{key}}' (e.g. a Model method), do not reshape with rest/spread.",
     },
   },
   defaultOptions: [],

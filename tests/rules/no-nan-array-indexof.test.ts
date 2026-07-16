@@ -14,10 +14,10 @@ const tester = new RuleTester({
 
 tester.run("no-nan-array-indexof", noNanArrayIndexOf, {
   valid: [
-    { code: "arr.includes(NaN)" },
-    { code: "arr.findIndex(Number.isNaN)" },
-    { code: "arr.indexOf(0)" },
-    { code: "arr.indexOf('hello')" },
+    { code: "amounts.includes(targetAmount)" },
+    { code: "amounts.findIndex(Number.isNaN)" },
+    { code: "amounts.indexOf(0)" },
+    { code: "amounts.indexOf(targetAmount)" },
   ],
   invalid: [
     {

@@ -2,7 +2,7 @@ import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -18,12 +18,12 @@ export const noNanArrayIndexOf = createRule<Options, MessageIds>({
     type: "problem",
     docs: {
       description:
-        "Disallow array.indexOf(NaN) which always returns -1. Use array.includes(NaN) or array.findIndex(Number.isNaN) instead.",
+        "Disallow array.indexOf(NaN) which always returns -1. Do not put NaN in arrays; model numeric absence with domain types instead.",
     },
     schema: [],
     messages: {
       noNanArrayIndexOf:
-        "array.indexOf(NaN) always returns -1 because NaN !== NaN. Use array.includes(NaN) or array.findIndex(Number.isNaN) instead.",
+        "array.indexOf(NaN) always returns -1 because NaN !== NaN. Do not use NaN; redesign the Model so numeric absence is not NaN.",
     },
   },
   defaultOptions: [],

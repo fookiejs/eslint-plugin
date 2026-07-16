@@ -2,7 +2,7 @@ import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -18,7 +18,7 @@ export const noAny = createRule<Options, MessageIds>({
       noAny: "Do not use 'any'. Use a specific type instead.",
       noObject: "Do not use 'object'. It is nearly as broad as 'any' — use a specific interface or Record<K, V> instead.",
       noObjectConstructorType: "Do not use 'Object' as a type. Use a specific interface or Record<K, V> instead. (Object.keys() etc. are fine.)",
-      noEmptyObjectType: "Do not use '{}' as a type. Use a specific interface or unknown instead.",
+      noEmptyObjectType: "Do not use '{}' as a type. Use a specific interface or Record<K, V> instead.",
     },
   },
   defaultOptions: [],

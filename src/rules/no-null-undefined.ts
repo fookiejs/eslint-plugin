@@ -2,7 +2,7 @@ import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -13,16 +13,17 @@ export const noNullUndefined = createRule<Options, MessageIds>({
   meta: {
     type: "problem",
     docs: {
-      description: "Disallow null, undefined, and void expressions as values",
+      description:
+        "Disallow null, undefined, and void expressions as values. Avoid nullish APIs; return a present value or throw.",
     },
     schema: [],
     messages: {
       noNull:
-        "Do not use null. Model absence with optional types (T | undefined or T?) instead.",
+        "Do not use null. Avoid null-returning APIs. Return a present value or throw.",
       noUndefined:
-        "Do not use undefined as a value. Return nothing or use optional types instead.",
+        "Do not use undefined. Do not write the undefined identifier. Return a present value or throw.",
       noVoidExpr:
-        "Do not use void expressions. void 0 is just undefined, which is also forbidden here.",
+        "Do not use void expressions. Return a present value or throw instead.",
     },
   },
   defaultOptions: [],
@@ -37,6 +38,10 @@ export const noNullUndefined = createRule<Options, MessageIds>({
       },
 
       "Identifier[name='undefined']"(node: TSESTree.Identifier) {
+        context.report({ node, messageId: "noUndefined" })
+      },
+
+      TSUndefinedKeyword(node: TSESTree.TSUndefinedKeyword) {
         context.report({ node, messageId: "noUndefined" })
       },
 

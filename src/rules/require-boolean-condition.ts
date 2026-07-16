@@ -3,7 +3,7 @@ import * as ts from "typescript"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/docs/rules/${name}.md`,
+    `https://github.com/fookiejs/eslint-plugin-fookie/blob/main/README.md`,
 )
 
 type Options = []
@@ -26,7 +26,7 @@ export const requireBooleanCondition = createRule<Options, MessageIds>({
     schema: [],
     messages: {
       requireBoolean:
-        "Condition has type '{{type}}'. Use an explicit boolean expression (e.g. x !== undefined, x.length > 0).",
+        "Condition has type '{{type}}'. Use an explicit boolean expression (e.g. flag === true, count > 0).",
     },
   },
   defaultOptions: [],
