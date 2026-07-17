@@ -370,13 +370,23 @@ const isEnabled = Boolean(rawFlag)
 ```
 
 #### `no-typeof`
-Disallow `typeof` checks — use `instanceof` or type predicates.
+Disallow `typeof` — validate with Zod (`safeParse`), narrow from Models.
 ```ts
 // ❌
 if (typeof accountStatus === 'string') { }
 
 // ✅
-if (accountStatus instanceof SuspendedStatus) { }
+if (accountStatusSchema.safeParse(accountStatus).success === true) { }
+```
+
+#### `no-hasownproperty`
+Disallow `hasOwnProperty` / `Object.hasOwn` — walk entries, Zod-validate, or use Model fields.
+```ts
+// ❌
+Object.prototype.hasOwnProperty.call(record, key)
+
+// ✅
+for (const [fieldKey, fieldValue] of Object.entries(record)) { usePair(fieldKey, fieldValue) }
 ```
 #### `no-eval`
 Disallow `eval()` and indirect eval patterns.

@@ -53,7 +53,7 @@ export const preferReadonlyParams = createRule<Options, MessageIds>({
           messageId: "preferReadonlyParams",
           data: {
             name: param.name,
-            type: context.getSourceCode().getText(t),
+            type: context.sourceCode.getText(t),
           },
         })
         return
@@ -67,7 +67,7 @@ export const preferReadonlyParams = createRule<Options, MessageIds>({
             messageId: "preferReadonlyParams",
             data: {
               name: param.name,
-              type: context.getSourceCode().getText(t),
+              type: context.sourceCode.getText(t),
             },
           })
         }
@@ -94,7 +94,7 @@ export const preferReadonlyParams = createRule<Options, MessageIds>({
                   messageId: "preferReadonlyParams",
                   data: {
                     name: inner.name,
-                    type: context.getSourceCode().getText(t),
+                    type: context.sourceCode.getText(t),
                   },
                 })
               }

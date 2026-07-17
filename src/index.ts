@@ -48,6 +48,7 @@ import { noPlaceholderNames } from "./rules/no-placeholder-names.js"
 import { noStringConcat } from "./rules/no-string-concat.js"
 import { noTypeAssertion } from "./rules/no-type-assertion.js"
 import { noTypeof } from "./rules/no-typeof.js"
+import { noHasOwnProperty } from "./rules/no-hasownproperty.js"
 import { requireBooleanCondition } from "./rules/require-boolean-condition.js"
 import { sameTypeComparison } from "./rules/same-type-comparison.js"
 
@@ -64,6 +65,7 @@ const rules = {
   "no-nullish-operators": noNullishOperators,
   "no-empty-string": noEmptyString,
   "no-typeof": noTypeof,
+  "no-hasownproperty": noHasOwnProperty,
   "no-legacy-globals": noLegacyGlobals,
   "no-new-wrappers": noNewWrappers,
   "no-string-concat": noStringConcat,
@@ -127,6 +129,7 @@ const recommendedRules = {
   "fookie/no-nullish-operators": "error",
   "fookie/no-empty-string": "error",
   "fookie/no-typeof": "error",
+  "fookie/no-hasownproperty": "error",
   "fookie/no-legacy-globals": "error",
   "fookie/no-new-wrappers": "error",
   "fookie/no-string-concat": "error",

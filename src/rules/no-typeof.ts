@@ -16,7 +16,7 @@ export const noTypeof = createRule<Options, MessageIds>({
     schema: [],
     messages: {
       noTypeof:
-        "Do not use typeof. Use TypeScript types and proper type narrowing instead.",
+        "Do not use typeof. Validate with Zod (safeParse); narrow from validated Models.",
     },
   },
   defaultOptions: [],
