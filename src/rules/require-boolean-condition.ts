@@ -1,5 +1,5 @@
 import { ESLintUtils, TSESTree } from "@typescript-eslint/utils"
-import * as ts from "typescript"
+import type * as ts from "typescript"
 
 const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -9,9 +9,14 @@ const createRule = ESLintUtils.RuleCreator(
 type Options = []
 type MessageIds = "requireBoolean"
 
-function isPurelyBoolean(type: ts.Type): boolean {
-  if ((type.flags & (ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral)) !== 0) return true
-  if (type.isUnion()) return type.types.every(isPurelyBoolean)
+function isPurelyBoolean(type: ts.Type, checker: ts.TypeChecker): boolean {
+  const printed = checker.typeToString(type)
+  if (printed === "boolean" || printed === "true" || printed === "false") {
+    return true
+  }
+  if (type.isUnion()) {
+    return type.types.every((part) => isPurelyBoolean(part, checker))
+  }
   return false
 }
 
@@ -37,14 +42,17 @@ export const requireBooleanCondition = createRule<Options, MessageIds>({
     function check(conditionNode: TSESTree.Expression): void {
       const tsNode = services.esTreeNodeToTSNodeMap.get(conditionNode)
       const type = checker.getTypeAtLocation(tsNode)
+      const printed = checker.typeToString(type)
 
-      if ((type.flags & ts.TypeFlags.Any) !== 0) return
+      if (printed === "any") {
+        return
+      }
 
-      if (!isPurelyBoolean(type)) {
+      if (isPurelyBoolean(type, checker) === false) {
         context.report({
           node: conditionNode,
           messageId: "requireBoolean",
-          data: { type: checker.typeToString(type) },
+          data: { type: printed },
         })
       }
     }
