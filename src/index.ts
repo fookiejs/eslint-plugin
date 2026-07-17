@@ -38,6 +38,7 @@ import { noDefineProperty } from "./rules/no-define-property.js"
 import { noMapSetMutation } from "./rules/no-map-set-mutation.js"
 import { minFunctionLines } from "./rules/min-function-lines.js"
 import { noSpread } from "./rules/no-spread.js"
+import { noUnionType } from "./rules/no-union-type.js"
 import { noLegacyGlobals } from "./rules/no-legacy-globals.js"
 import { noNewWrappers } from "./rules/no-new-wrappers.js"
 import { noNonNullAssertion } from "./rules/no-non-null-assertion.js"
@@ -102,6 +103,7 @@ const rules = {
   "no-map-set-mutation": noMapSetMutation,
   "min-function-lines": minFunctionLines,
   "no-spread": noSpread,
+  "no-union-type": noUnionType,
 }
 
 const configs: Record<string, unknown> = {}
@@ -164,6 +166,7 @@ const recommendedRules = {
   "fookie/no-map-set-mutation": "error",
   "fookie/min-function-lines": ["error", { min: 7 }],
   "fookie/no-spread": "error",
+  "fookie/no-union-type": "error",
 }
 
 configs["recommended"] = {

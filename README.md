@@ -345,6 +345,18 @@ for (const configKey in config) { }
 for (const configKey of Object.keys(config)) { }
 ```
 
+#### `no-union-type`
+Disallow TypeScript union types (`A | B`) everywhere.
+```ts
+// ❌
+function normalize(value: string | false): string { return "" }
+type IdOrMissing = string | false
+
+// ✅
+function normalize(value: string): string { return value }
+type EntityId = string
+```
+
 #### `no-implicit-coercion`
 Disallow implicit type coercions.
 ```ts
