@@ -480,7 +480,7 @@ const port = config.port
 ### Classes
 
 #### `require-private-constructor`
-Class constructors must be `private`. Use static factory methods.
+Class constructors must be `private` or `protected`. Use static factory methods. Use `protected` on abstract bases that subclasses extend via `super()`.
 ```ts
 // ❌
 class User {
@@ -492,6 +492,16 @@ class User {
   private constructor(public name: string) {}
   static create(name: string): User {
     return new User(name)
+  }
+}
+
+// ✅ base error type (subclasses call super)
+class FookieError extends Error {
+  protected constructor(message: string) {
+    super(message)
+  }
+  static create(message: string): FookieError {
+    return new FookieError(message)
   }
 }
 ```

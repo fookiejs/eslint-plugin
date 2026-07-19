@@ -14,7 +14,7 @@ export const requirePrivateConstructor = createRule<Options, MessageIds>({
     type: "suggestion",
     docs: {
       description:
-        "Require class constructors to be private. Forces use of static factory methods.",
+        "Require class constructors to be private or protected. Forces use of static factory methods.",
     },
     schema: [],
     messages: {
@@ -28,6 +28,7 @@ export const requirePrivateConstructor = createRule<Options, MessageIds>({
       MethodDefinition(node: TSESTree.MethodDefinition) {
         if (node.kind !== "constructor") return
         if (node.accessibility === "private") return
+        if (node.accessibility === "protected") return
 
         const classNode = node.parent.parent as
           | TSESTree.ClassDeclaration
